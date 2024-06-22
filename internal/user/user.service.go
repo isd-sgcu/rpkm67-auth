@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/isd-sgcu/rpkm67-auth/internal/constant"
+	"github.com/isd-sgcu/rpkm67-auth/constant"
 	"github.com/isd-sgcu/rpkm67-auth/internal/model"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"go.uber.org/zap"
@@ -39,11 +39,10 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 	}
 
 	createUser := &model.User{
-		StudentId: req.StudentId,
+		Email:     req.Email,
 		Password:  hashPassword,
 		Firstname: req.Firstname,
 		Lastname:  req.Lastname,
-		Tel:       req.Tel,
 		Role:      constant.USER,
 	}
 
@@ -75,13 +74,27 @@ func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest) 
 	}, nil
 }
 
+func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailRequest) (res *proto.FindByEmailResponse, err error) {
+	user := &model.User{}
+
+	err = s.repo.FindOne(req.Email, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
+		}
+		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage+" "+err.Error())
+	}
+	return &proto.FindByEmailResponse{
+		User: ModelToProto(user),
+	}, nil
+}
+
 func ModelToProto(in *model.User) *proto.User {
 	return &proto.User{
 		Id:        in.ID.String(),
-		StudentId: in.StudentId,
+		Email:     in.Email,
 		Firstname: in.Firstname,
 		Lastname:  in.Lastname,
-		Tel:       in.Tel,
 		Role:      in.Role.String(),
 	}
 }

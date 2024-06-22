@@ -1,10 +1,10 @@
 package model
 
-import constants "github.com/isd-sgcu/rpkm67-auth/internal/constant"
+import constants "github.com/isd-sgcu/rpkm67-auth/constant"
 
 type User struct {
 	Base
-	StudentId string         `json:"student_id" gorm:"tinytext;unique"`
+	Email     string         `json:"email" gorm:"tinytext;unique"`
 	Password  string         `json:"password" gorm:"tinytext"`
 	Firstname string         `json:"firstname" gorm:"tinytext"`
 	Lastname  string         `json:"lastname" gorm:"tinytext"`

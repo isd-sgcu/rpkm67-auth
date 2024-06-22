@@ -7,6 +7,7 @@ import (
 
 type Repository interface {
 	FindOne(id string, user *model.User) error
+	FindByEmail(email string, user *model.User) error
 	Create(user *model.User) error
 	Update(id string, user *model.User) error
 }
@@ -21,6 +22,10 @@ func NewRepository(db *gorm.DB) Repository {
 
 func (r *repositoryImpl) FindOne(id string, user *model.User) error {
 	return r.Db.First(user, "id = ?", id).Error
+}
+
+func (r *repositoryImpl) FindByEmail(email string, user *model.User) error {
+	return r.Db.First(user, "email = ?", email).Error
 }
 
 func (r *repositoryImpl) Create(user *model.User) error {
