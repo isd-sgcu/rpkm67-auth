@@ -1,24 +1,24 @@
 package database
 
-// import (
-// 	"fmt"
+import (
+	"errors"
+	"fmt"
 
-// 	"github.com/isd-sgcu/johnjud-auth/cfgldr"
-// 	"github.com/pkg/errors"
-// 	"github.com/redis/go-redis/v9"
-// )
+	"github.com/isd-sgcu/rpkm67-auth/config"
+	"github.com/redis/go-redis/v9"
+)
 
-// func InitRedisConnection(conf *cfgldr.Redis) (*redis.Client, error) {
-// 	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
+func InitRedis(conf *config.RedisConfig) (*redis.Client, error) {
+	addr := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 
-// 	cache := redis.NewClient(&redis.Options{
-// 		Addr:     addr,
-// 		Password: conf.Password,
-// 	})
+	cache := redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: conf.Password,
+	})
 
-// 	if cache == nil {
-// 		return nil, errors.New("Failed to connect to redis server")
-// 	}
+	if cache == nil {
+		return nil, errors.New("Failed to connect to redis server")
+	}
 
-// 	return cache, nil
-// }
+	return cache, nil
+}
