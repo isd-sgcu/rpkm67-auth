@@ -12,7 +12,8 @@ import (
 
 	"github.com/isd-sgcu/rpkm67-auth/config"
 	"github.com/isd-sgcu/rpkm67-auth/database"
-	user "github.com/isd-sgcu/rpkm67-auth/internal/user"
+	"github.com/isd-sgcu/rpkm67-auth/internal/cache"
+	"github.com/isd-sgcu/rpkm67-auth/internal/user"
 	"github.com/isd-sgcu/rpkm67-auth/logger"
 	userProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"go.uber.org/zap"
@@ -34,6 +35,13 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
+
+	redis, err := database.InitRedis(&conf.Redis)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to redis: %v", err))
+	}
+
+	cacheRepo := cache.NewRepository(redis)
 
 	userRepo := user.NewRepository(db)
 	userUtils := user.NewUserUtils()
