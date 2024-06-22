@@ -1,3 +1,6 @@
+docker:
+	docker-compose up
+
 server:
 	go run cmd/main.go
 
