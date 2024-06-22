@@ -8,8 +8,8 @@ services:
 
     environment:
       POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: johnjud_db
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: rpkm67_db
     networks:
       - rpkm67
     volumes:
@@ -17,9 +17,9 @@ services:
     ports:
       - "5432:5432"
 
-  redis:
+  cache:
     image: redis:7.2.3-alpine
-    container_name: redis
+    container_name: cache
     restart: unless-stopped
 
     environment:
