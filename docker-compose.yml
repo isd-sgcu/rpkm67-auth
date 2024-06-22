@@ -8,7 +8,7 @@ services:
 
     environment:
       POSTGRES_USER: root
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_PASSWORD: "1234"
       POSTGRES_DB: rpkm67_db
     networks:
       - rpkm67
