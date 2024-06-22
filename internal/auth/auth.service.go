@@ -3,10 +3,14 @@ package auth
 import (
 	"context"
 
+	"github.com/isd-sgcu/rpkm67-auth/constant"
+	"github.com/isd-sgcu/rpkm67-auth/internal/token"
 	"github.com/isd-sgcu/rpkm67-auth/internal/user"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/auth/v1"
 	userProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Service interface {
@@ -15,13 +19,20 @@ type Service interface {
 
 type serviceImpl struct {
 	proto.UnimplementedAuthServiceServer
-	userSvc user.Service
-	log     *zap.Logger
+	userSvc  user.Service
+	tokenSvc token.Service
+	utils    AuthUtils
+	bcrypt   BcryptUtils
+	log      *zap.Logger
 }
 
-func NewService(log *zap.Logger) Service {
+func NewService(userSvc user.Service, tokenSvc token.Service, utils AuthUtils, bcrypt BcryptUtils, log *zap.Logger) Service {
 	return &serviceImpl{
-		log: log,
+		userSvc:  userSvc,
+		tokenSvc: tokenSvc,
+		utils:    utils,
+		bcrypt:   bcrypt,
+		log:      log,
 	}
 }
 
@@ -34,12 +45,22 @@ func (s *serviceImpl) RefreshToken(_ context.Context, in *proto.RefreshTokenRequ
 }
 
 func (s *serviceImpl) SignUp(_ context.Context, in *proto.SignUpRequest) (res *proto.SignUpResponse, err error) {
+	role := "user"
+	if s.utils.IsStudentIdInMap(in.Email) {
+		role = "staff"
+	}
+
+	hashedPassword, err := s.bcrypt.GenerateHashedPassword(in.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	createUser := &userProto.CreateUserRequest{
 		Email:     in.Email,
-		Password:  in.Password,
+		Password:  hashedPassword,
 		Firstname: in.Firstname,
 		Lastname:  in.Lastname,
-		Role:      in.Role,
+		Role:      role,
 	}
 
 	userRes, err := s.userSvc.Create(context.Background(), createUser)
@@ -48,18 +69,36 @@ func (s *serviceImpl) SignUp(_ context.Context, in *proto.SignUpRequest) (res *p
 	}
 
 	return &proto.SignUpResponse{
-		Credential: nil,
+		Id:        userRes.User.Id,
+		Email:     userRes.User.Email,
+		Firstname: userRes.User.Firstname,
+		Lastname:  userRes.User.Lastname,
 	}, nil
 }
 
 func (s *serviceImpl) SignIn(_ context.Context, in *proto.SignInRequest) (res *proto.SignInResponse, err error) {
-	// user := &model.User{}
-	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{})
+	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{Email: in.Email})
 	if err != nil {
 		return nil, err
 	}
 
-	// return nil, nil
+	err = s.bcrypt.CompareHashedPassword(in.Password, user.User.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	credentials, err := s.tokenSvc.CreateCredentials(user.User.Id, constant.Role(user.User.Role))
+	if err != nil {
+		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
+	}
+
+	return &proto.SignInResponse{
+		Credential: &proto.Credential{
+			AccessToken:  credentials.AccessToken,
+			RefreshToken: credentials.RefreshToken,
+			ExpiresIn:    int32(s.tokenSvc.GetConfig().AccessTTL),
+		},
+	}, nil
 }
 
 func (s *serviceImpl) SignOut(_ context.Context, in *proto.SignOutRequest) (res *proto.SignOutResponse, err error) {

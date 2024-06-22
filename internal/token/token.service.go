@@ -4,16 +4,18 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/isd-sgcu/rpkm67-auth/config"
+	"github.com/isd-sgcu/rpkm67-auth/constant"
 	"github.com/isd-sgcu/rpkm67-auth/internal/cache"
 	"github.com/isd-sgcu/rpkm67-auth/internal/dto"
 	"github.com/isd-sgcu/rpkm67-auth/internal/jwt"
-	"github.com/isd-sgcu/rpkm67-auth/internal/model"
 )
 
 type Service interface {
-	GetCredentials(user *model.User) (*dto.Credentials, error)
-	CreateCredentials(user *model.User) (*dto.Credentials, error)
+	GetCredentials(userId string, role constant.Role) (*dto.Credentials, error)
+	CreateCredentials(userId string, role constant.Role) (*dto.Credentials, error)
 	RefreshToken(refreshToken string) (*dto.Credentials, error)
+	GetConfig() *config.JwtConfig
 }
 
 type serviceImpl struct {
@@ -30,15 +32,15 @@ func NewService(jwtService jwt.Service, cache cache.Repository, tokenUtils Token
 	}
 }
 
-func (s *serviceImpl) GetCredentials(user *model.User) (*dto.Credentials, error) {
+func (s *serviceImpl) GetCredentials(userId string, role constant.Role) (*dto.Credentials, error) {
 	credentials := &dto.Credentials{}
-	err := s.cache.GetValue(sessionKey(user.ID.String()), credentials)
+	err := s.cache.GetValue(sessionKey(userId), credentials)
 	if err != nil {
 		return nil, err
 	}
 
 	if (credentials == &dto.Credentials{}) { // no session found
-		credentials, err = s.CreateCredentials(user)
+		credentials, err = s.CreateCredentials(userId, role)
 		if err != nil {
 			return nil, err
 		}
@@ -46,12 +48,12 @@ func (s *serviceImpl) GetCredentials(user *model.User) (*dto.Credentials, error)
 
 	_, err = s.jwtService.ValidateToken(credentials.AccessToken)
 	if err != nil { // still have refreshToken but accessToken is expired
-		err := s.cache.DeleteValue(sessionKey(user.ID.String()))
+		err := s.cache.DeleteValue(sessionKey(userId))
 		if err != nil {
 			return nil, err
 		}
 
-		accessToken, err := s.jwtService.CreateToken(user)
+		accessToken, err := s.jwtService.CreateToken(userId, role)
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +63,7 @@ func (s *serviceImpl) GetCredentials(user *model.User) (*dto.Credentials, error)
 			RefreshToken: credentials.RefreshToken,
 		}
 
-		err = s.cache.SetValue(sessionKey(user.ID.String()), newCredentials, s.jwtService.GetConfig().AccessTTL)
+		err = s.cache.SetValue(sessionKey(userId), newCredentials, s.jwtService.GetConfig().AccessTTL)
 		if err != nil {
 			return nil, err
 		}
@@ -72,15 +74,18 @@ func (s *serviceImpl) GetCredentials(user *model.User) (*dto.Credentials, error)
 	return credentials, nil
 }
 
-func (s *serviceImpl) CreateCredentials(user *model.User) (*dto.Credentials, error) {
-	accessToken, err := s.jwtService.CreateToken(user)
+func (s *serviceImpl) CreateCredentials(userId string, role constant.Role) (*dto.Credentials, error) {
+	accessToken, err := s.jwtService.CreateToken(userId, role)
 	if err != nil {
 		return nil, err
 	}
 
 	refreshToken := createRefreshToken()
 
-	err = s.cache.SetValue(refreshKey(refreshToken), user, s.jwtService.GetConfig().RefreshTTL)
+	err = s.cache.SetValue(refreshKey(refreshToken), &dto.RefreshTokenCache{
+		UserID: userId,
+		Role:   role,
+	}, s.jwtService.GetConfig().RefreshTTL)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +95,7 @@ func (s *serviceImpl) CreateCredentials(user *model.User) (*dto.Credentials, err
 		RefreshToken: refreshToken,
 	}
 
-	err = s.cache.SetValue(sessionKey(user.ID.String()), credentials, s.jwtService.GetConfig().AccessTTL)
+	err = s.cache.SetValue(sessionKey(userId), credentials, s.jwtService.GetConfig().AccessTTL)
 	if err != nil {
 		return nil, err
 	}
@@ -99,11 +104,11 @@ func (s *serviceImpl) CreateCredentials(user *model.User) (*dto.Credentials, err
 }
 
 func (s *serviceImpl) RefreshToken(refreshToken string) (*dto.Credentials, error) {
-	user := &model.User{}
-	err := s.cache.GetValue(refreshKey(refreshToken), user)
+	refreshCache := &dto.RefreshTokenCache{}
+	err := s.cache.GetValue(refreshKey(refreshToken), refreshCache)
 	if err != nil {
 		return nil, err
-	} else if (user == &model.User{}) {
+	} else if (refreshCache == &dto.RefreshTokenCache{}) {
 		return nil, fmt.Errorf("refresh token not found")
 	}
 
@@ -112,17 +117,21 @@ func (s *serviceImpl) RefreshToken(refreshToken string) (*dto.Credentials, error
 		return nil, err
 	}
 
-	err = s.cache.DeleteValue(sessionKey(user.ID.String()))
+	err = s.cache.DeleteValue(sessionKey(refreshCache.UserID))
 	if err != nil {
 		return nil, err
 	}
 
-	credentials, err := s.CreateCredentials(user)
+	credentials, err := s.CreateCredentials(refreshCache.UserID, refreshCache.Role)
 	if err != nil {
 		return nil, err
 	}
 
 	return credentials, nil
+}
+
+func (s *serviceImpl) GetConfig() *config.JwtConfig {
+	return s.jwtService.GetConfig()
 }
 
 func createRefreshToken() string {

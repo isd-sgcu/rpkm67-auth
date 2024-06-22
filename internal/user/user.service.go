@@ -19,28 +19,21 @@ type Service interface {
 
 type serviceImpl struct {
 	proto.UnimplementedUserServiceServer
-	repo  Repository
-	utils UserUtils
-	log   *zap.Logger
+	repo Repository
+	log  *zap.Logger
 }
 
-func NewService(repo Repository, utils UserUtils, log *zap.Logger) proto.UserServiceServer {
+func NewService(repo Repository, log *zap.Logger) proto.UserServiceServer {
 	return &serviceImpl{
-		repo:  repo,
-		utils: utils,
-		log:   log,
+		repo: repo,
+		log:  log,
 	}
 }
 
 func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (res *proto.CreateUserResponse, err error) {
-	hashPassword, err := s.utils.GenerateHashedPassword(req.Password)
-	if err != nil {
-		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
-	}
-
 	createUser := &model.User{
 		Email:     req.Email,
-		Password:  hashPassword,
+		Password:  req.Password, // already hashed in auth service
 		Firstname: req.Firstname,
 		Lastname:  req.Lastname,
 		Role:      constant.USER,
@@ -51,7 +44,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return nil, status.Error(codes.AlreadyExists, constant.DuplicateEmailErrorMessage)
 		}
-		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
+		return nil, err
 	}
 
 	return &proto.CreateUserResponse{
@@ -67,7 +60,7 @@ func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest) 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
 		}
-		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage+" "+err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &proto.FindOneUserResponse{
 		User: ModelToProto(user),
@@ -82,7 +75,7 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailReque
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
 		}
-		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage+" "+err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &proto.FindByEmailResponse{
 		User: ModelToProto(user),

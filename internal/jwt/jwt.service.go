@@ -6,13 +6,13 @@ import (
 
 	_jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/isd-sgcu/rpkm67-auth/config"
+	"github.com/isd-sgcu/rpkm67-auth/constant"
 	"github.com/isd-sgcu/rpkm67-auth/internal/dto"
-	"github.com/isd-sgcu/rpkm67-auth/internal/model"
 	"github.com/pkg/errors"
 )
 
 type Service interface {
-	CreateToken(user *model.User) (string, error)
+	CreateToken(userId string, role constant.Role) (string, error)
 	ValidateToken(token string) (*_jwt.Token, error)
 	GetConfig() *config.JwtConfig
 }
@@ -27,14 +27,15 @@ func NewService(config config.JwtConfig, strategy JwtStrategy, jwtUtils JwtUtils
 	return &serviceImpl{config: config, strategy: strategy, jwtUtils: jwtUtils}
 }
 
-func (s *serviceImpl) CreateToken(user *model.User) (string, error) {
+func (s *serviceImpl) CreateToken(userId string, role constant.Role) (string, error) {
 	payloads := dto.AuthPayload{
 		RegisteredClaims: _jwt.RegisteredClaims{
 			Issuer:    s.config.Issuer,
 			ExpiresAt: s.jwtUtils.GetNumericDate(time.Now().Add(time.Second * time.Duration(s.config.AccessTTL))),
 			IssuedAt:  s.jwtUtils.GetNumericDate(time.Now()),
 		},
-		UserId: user.ID.String(),
+		UserId: userId,
+		Role:   role,
 	}
 
 	token := s.jwtUtils.GenerateJwtToken(_jwt.SigningMethodHS256, payloads)

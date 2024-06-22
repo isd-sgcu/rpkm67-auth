@@ -8,7 +8,7 @@ type TokenUtils interface {
 
 type tokenUtilsImpl struct{}
 
-func NewUuidUtil() TokenUtils {
+func NewTokenUtils() TokenUtils {
 	return &tokenUtilsImpl{}
 }
 

@@ -10,28 +10,15 @@ type Credentials struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-type UserCredential struct {
-	UserID        string        `json:"user_id"`
-	Role          constant.Role `json:"role"`
-	AuthSessionID string        `json:"auth_session_id"`
-	RefreshToken  string        `json:"refresh_token"`
-}
-
 type AuthPayload struct {
 	jwt.RegisteredClaims
-	UserId string `json:"user_id"`
-}
-
-type AccessTokenCache struct {
-	Token        string        `json:"token"`
-	Role         constant.Role `json:"role"`
-	RefreshToken string        `json:"refresh_token"`
+	UserId string        `json:"user_id"`
+	Role   constant.Role `json:"role"`
 }
 
 type RefreshTokenCache struct {
-	AuthSessionID string        `json:"auth_session_id"`
-	UserID        string        `json:"user_id"`
-	Role          constant.Role `json:"role"`
+	UserID string        `json:"user_id"`
+	Role   constant.Role `json:"role"`
 }
 
 type ResetPasswordTokenCache struct {

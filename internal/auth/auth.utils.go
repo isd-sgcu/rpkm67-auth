@@ -5,6 +5,37 @@ import (
 	"os"
 )
 
+type AuthUtils interface {
+	IsStudentIdInMap(studentId string) bool
+}
+
+type authUtilsImpl struct {
+	staffStudentIdMap map[string]interface{}
+}
+
+func NewAuthUtils() AuthUtils {
+	staffStudentIdMap, err := extractMapFromFile("staff.json")
+	if err != nil {
+		panic(err)
+	}
+
+	return &authUtilsImpl{
+		staffStudentIdMap: staffStudentIdMap,
+	}
+}
+
+func (u *authUtilsImpl) IsStudentIdInMap(email string) bool {
+	studentId := extractStudentIdFromEmail(email)
+
+	_, ok := u.staffStudentIdMap[studentId]
+	return ok
+}
+
+func extractStudentIdFromEmail(email string) string {
+	// Example: "6932203021@student.chula.ac.th" -> "6932203021"
+	return email[:10]
+}
+
 type marshalledJson struct {
 	// Other data fields in your original JSON structure
 	Staffs []string `json:"staffs"`
@@ -30,5 +61,3 @@ func extractMapFromFile(filePath string) (map[string]interface{}, error) {
 
 	return extractedMap, nil
 }
-
-var StaffStudentIdMap, err = extractMapFromFile("staff_student_id.json")
