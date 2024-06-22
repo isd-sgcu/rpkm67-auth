@@ -19,4 +19,4 @@ test:
 	go tool cover -html=coverage.out -o coverage.html
 
 proto:
-	go get github.com/isd-sgcu/johnjud-go-proto@latest
+	go get github.com/isd-sgcu/rpkm67-go-proto@latest
