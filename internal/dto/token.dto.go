@@ -5,6 +5,11 @@ import (
 	"github.com/isd-sgcu/rpkm67-auth/constant"
 )
 
+type Credentials struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type UserCredential struct {
 	UserID        string        `json:"user_id"`
 	Role          constant.Role `json:"role"`
@@ -14,8 +19,7 @@ type UserCredential struct {
 
 type AuthPayload struct {
 	jwt.RegisteredClaims
-	UserID        string `json:"user_id"`
-	AuthSessionID string `json:"auth_session_id"`
+	UserId string `json:"user_id"`
 }
 
 type AccessTokenCache struct {
