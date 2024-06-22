@@ -8,14 +8,13 @@ import (
 	"github.com/isd-sgcu/rpkm67-auth/internal/model"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
 type Service interface {
-	proto.UserServiceClient
+	proto.UserServiceServer
 }
 
 type serviceImpl struct {
@@ -25,7 +24,7 @@ type serviceImpl struct {
 	log   *zap.Logger
 }
 
-func NewService(repo Repository, utils UserUtils, log *zap.Logger) proto.UserServiceClient {
+func NewService(repo Repository, utils UserUtils, log *zap.Logger) proto.UserServiceServer {
 	return &serviceImpl{
 		repo:  repo,
 		utils: utils,
@@ -33,7 +32,7 @@ func NewService(repo Repository, utils UserUtils, log *zap.Logger) proto.UserSer
 	}
 }
 
-func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest, _ ...grpc.CallOption) (res *proto.CreateUserResponse, err error) {
+func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (res *proto.CreateUserResponse, err error) {
 	hashPassword, err := s.utils.GenerateHashedPassword(req.Password)
 	if err != nil {
 		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
@@ -61,7 +60,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest, _ 
 	}, nil
 }
 
-func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest, _ ...grpc.CallOption) (res *proto.FindOneUserResponse, err error) {
+func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest) (res *proto.FindOneUserResponse, err error) {
 	user := &model.User{}
 
 	err = s.repo.FindOne(req.Id, user)

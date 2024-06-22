@@ -9,7 +9,7 @@ type UserUtils interface {
 
 type userUtilsImpl struct{}
 
-func NewBcryptUtil() UserUtils {
+func NewUserUtils() UserUtils {
 	return &userUtilsImpl{}
 }
 
