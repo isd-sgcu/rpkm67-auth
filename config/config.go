@@ -8,9 +8,8 @@ import (
 )
 
 type AppConfig struct {
-	Port   string
-	Env    string
-	Secret string
+	Port string
+	Env  string
 }
 
 type DbConfig struct {
@@ -47,9 +46,8 @@ func LoadConfig() (*Config, error) {
 	}
 
 	appConfig := AppConfig{
-		Port:   os.Getenv("APP_PORT"),
-		Env:    os.Getenv("APP_ENV"),
-		Secret: os.Getenv("APP_SECRET"),
+		Port: os.Getenv("APP_PORT"),
+		Env:  os.Getenv("APP_ENV"),
 	}
 
 	dbConfig := DbConfig{

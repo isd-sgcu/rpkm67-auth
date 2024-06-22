@@ -12,9 +12,13 @@ import (
 
 	"github.com/isd-sgcu/rpkm67-auth/config"
 	"github.com/isd-sgcu/rpkm67-auth/database"
+	"github.com/isd-sgcu/rpkm67-auth/internal/auth"
 	"github.com/isd-sgcu/rpkm67-auth/internal/cache"
+	"github.com/isd-sgcu/rpkm67-auth/internal/jwt"
+	"github.com/isd-sgcu/rpkm67-auth/internal/token"
 	"github.com/isd-sgcu/rpkm67-auth/internal/user"
 	"github.com/isd-sgcu/rpkm67-auth/logger"
+	authProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/auth/v1"
 	userProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -44,8 +48,11 @@ func main() {
 	cacheRepo := cache.NewRepository(redis)
 
 	userRepo := user.NewRepository(db)
-	userUtils := user.NewUserUtils()
-	userSvc := user.NewService(userRepo, userUtils, logger)
+	userSvc := user.NewService(userRepo, logger)
+
+	jwtSvc := jwt.NewService(conf.Jwt, jwt.NewJwtStrategy(conf.Jwt.Secret), jwt.NewJwtUtils())
+	tokenSvc := token.NewService(jwtSvc, cacheRepo, token.NewTokenUtils())
+	authSvc := auth.NewService(userSvc, tokenSvc, auth.NewAuthUtils(), auth.NewBcryptUtils(), logger)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", conf.App.Port))
 	if err != nil {
@@ -55,6 +62,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	userProto.RegisterUserServiceServer(grpcServer, userSvc)
+	authProto.RegisterAuthServiceServer(grpcServer, authSvc)
 
 	reflection.Register(grpcServer)
 	go func() {
