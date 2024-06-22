@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15.1-alpine3.17
+    container_name: db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: johnjud_db
+    networks:
+      - rpkm67
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7.2.3-alpine
+    container_name: redis
+    restart: unless-stopped
+
+    environment:
+      REDIS_HOST: localhost
+      ALLOW_EMPTY_PASSWORD: "yes"
+    networks:
+      - rpkm67
+    ports:
+      - "6379:6379"
+
+networks:
+  rpkm67:
+    name: rpkm67
