@@ -52,7 +52,8 @@ func (s *serviceImpl) SignUp(_ context.Context, in *proto.SignUpRequest) (res *p
 
 	hashedPassword, err := s.bcrypt.GenerateHashedPassword(in.Password)
 	if err != nil {
-		return nil, err
+		s.log.Named("SignUp").Error("GenerateHashedPassword: ", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	createUser := &userProto.CreateUserRequest{
@@ -65,7 +66,8 @@ func (s *serviceImpl) SignUp(_ context.Context, in *proto.SignUpRequest) (res *p
 
 	userRes, err := s.userSvc.Create(context.Background(), createUser)
 	if err != nil {
-		return nil, err
+		s.log.Named("SignUp").Error("Create: ", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &proto.SignUpResponse{
@@ -79,17 +81,20 @@ func (s *serviceImpl) SignUp(_ context.Context, in *proto.SignUpRequest) (res *p
 func (s *serviceImpl) SignIn(_ context.Context, in *proto.SignInRequest) (res *proto.SignInResponse, err error) {
 	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{Email: in.Email})
 	if err != nil {
-		return nil, err
+		s.log.Named("SignIn").Error("FindByEmail: ", zap.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
-	err = s.bcrypt.CompareHashedPassword(in.Password, user.User.Password)
+	err = s.bcrypt.CompareHashedPassword(user.User.Password, in.Password)
 	if err != nil {
-		return nil, err
+		s.log.Named("SignIn").Error("CompareHashedPassword: ", zap.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
-	credentials, err := s.tokenSvc.CreateCredentials(user.User.Id, constant.Role(user.User.Role))
+	credentials, err := s.tokenSvc.GetCredentials(user.User.Id, constant.Role(user.User.Role))
 	if err != nil {
-		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
+		s.log.Named("SignIn").Error("GetCredentials: ", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &proto.SignInResponse{

@@ -70,7 +70,7 @@ func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest) 
 func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailRequest) (res *proto.FindByEmailResponse, err error) {
 	user := &model.User{}
 
-	err = s.repo.FindOne(req.Email, user)
+	err = s.repo.FindByEmail(req.Email, user)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
@@ -86,6 +86,7 @@ func ModelToProto(in *model.User) *proto.User {
 	return &proto.User{
 		Id:        in.ID.String(),
 		Email:     in.Email,
+		Password:  in.Password,
 		Firstname: in.Firstname,
 		Lastname:  in.Lastname,
 		Role:      in.Role.String(),

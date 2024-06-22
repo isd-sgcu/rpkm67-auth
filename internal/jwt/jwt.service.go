@@ -9,6 +9,7 @@ import (
 	"github.com/isd-sgcu/rpkm67-auth/constant"
 	"github.com/isd-sgcu/rpkm67-auth/internal/dto"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 type Service interface {
@@ -21,10 +22,11 @@ type serviceImpl struct {
 	config   config.JwtConfig
 	strategy JwtStrategy
 	jwtUtils JwtUtils
+	log      *zap.Logger
 }
 
-func NewService(config config.JwtConfig, strategy JwtStrategy, jwtUtils JwtUtils) Service {
-	return &serviceImpl{config: config, strategy: strategy, jwtUtils: jwtUtils}
+func NewService(config config.JwtConfig, strategy JwtStrategy, jwtUtils JwtUtils, log *zap.Logger) Service {
+	return &serviceImpl{config: config, strategy: strategy, jwtUtils: jwtUtils, log: log}
 }
 
 func (s *serviceImpl) CreateToken(userId string, role constant.Role) (string, error) {
@@ -42,6 +44,7 @@ func (s *serviceImpl) CreateToken(userId string, role constant.Role) (string, er
 
 	tokenStr, err := s.jwtUtils.SignedTokenString(token, s.config.Secret)
 	if err != nil {
+		s.log.Named("CreateToken").Error("SignedTokenString: ", zap.Error(err))
 		return "", errors.New(fmt.Sprintf("Error while signing the token due to: %s", err.Error()))
 	}
 

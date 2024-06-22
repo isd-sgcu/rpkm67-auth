@@ -48,11 +48,11 @@ func main() {
 	cacheRepo := cache.NewRepository(redis)
 
 	userRepo := user.NewRepository(db)
-	userSvc := user.NewService(userRepo, logger)
+	userSvc := user.NewService(userRepo, logger.Named("userSvc"))
 
-	jwtSvc := jwt.NewService(conf.Jwt, jwt.NewJwtStrategy(conf.Jwt.Secret), jwt.NewJwtUtils())
-	tokenSvc := token.NewService(jwtSvc, cacheRepo, token.NewTokenUtils())
-	authSvc := auth.NewService(userSvc, tokenSvc, auth.NewAuthUtils(), auth.NewBcryptUtils(), logger)
+	jwtSvc := jwt.NewService(conf.Jwt, jwt.NewJwtStrategy(conf.Jwt.Secret), jwt.NewJwtUtils(), logger.Named("jwtSvc"))
+	tokenSvc := token.NewService(jwtSvc, cacheRepo, token.NewTokenUtils(), logger.Named("tokenSvc"))
+	authSvc := auth.NewService(userSvc, tokenSvc, auth.NewAuthUtils(), auth.NewBcryptUtils(), logger.Named("authSvc"))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", conf.App.Port))
 	if err != nil {
