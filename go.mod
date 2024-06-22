@@ -1,8 +1,6 @@
 module github.com/isd-sgcu/rpkm67-auth
 
-go 1.21.3
-
-toolchain go1.21.11
+go 1.22.4
 
 require (
 	github.com/google/uuid v1.6.0
