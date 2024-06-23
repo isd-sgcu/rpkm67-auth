@@ -36,7 +36,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 		Password:  req.Password, // already hashed in auth service
 		Firstname: req.Firstname,
 		Lastname:  req.Lastname,
-		Role:      constant.USER,
+		Role:      constant.Role(req.Role),
 	}
 
 	err = s.repo.Create(createUser)
