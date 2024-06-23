@@ -14,7 +14,7 @@ type authUtilsImpl struct {
 }
 
 func NewAuthUtils() AuthUtils {
-	staffStudentIdMap, err := extractMapFromFile("staff.json")
+	staffStudentIdMap, err := extractMapFromFile("./config/staffs/staff.json")
 	if err != nil {
 		panic(err)
 	}
