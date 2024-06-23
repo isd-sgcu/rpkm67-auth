@@ -41,6 +41,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 
 	err = s.repo.Create(createUser)
 	if err != nil {
+		s.log.Named("Create").Error("Create: ", zap.Error(err))
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return nil, status.Error(codes.AlreadyExists, constant.DuplicateEmailErrorMessage)
 		}
@@ -57,11 +58,13 @@ func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest) 
 
 	err = s.repo.FindOne(req.Id, user)
 	if err != nil {
+		s.log.Named("FindOne").Error("FindOne: ", zap.Error(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
 	return &proto.FindOneUserResponse{
 		User: ModelToProto(user),
 	}, nil
@@ -72,11 +75,13 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailReque
 
 	err = s.repo.FindByEmail(req.Email, user)
 	if err != nil {
+		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
 	return &proto.FindByEmailResponse{
 		User: ModelToProto(user),
 	}, nil
