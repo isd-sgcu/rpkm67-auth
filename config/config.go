@@ -30,11 +30,18 @@ type JwtConfig struct {
 	ResetTokenTTL int
 }
 
+type OauthConfig struct {
+	ClientId     string `mapstructure:"client_id"`
+	ClientSecret string `mapstructure:"client_secret"`
+	RedirectUri  string `mapstructure:"redirect_uri"`
+}
+
 type Config struct {
 	App   AppConfig
 	Db    DbConfig
 	Redis RedisConfig
 	Jwt   JwtConfig
+	Oauth OauthConfig
 }
 
 func LoadConfig() (*Config, error) {
@@ -86,11 +93,18 @@ func LoadConfig() (*Config, error) {
 		ResetTokenTTL: int(resetTokenTTL),
 	}
 
+	oauthConfig := OauthConfig{
+		ClientId:     os.Getenv("OAUTH_CLIENT_ID"),
+		ClientSecret: os.Getenv("OAUTH_CLIENT_SECRET"),
+		RedirectUri:  os.Getenv("OAUTH_REDIRECT_URI"),
+	}
+
 	return &Config{
 		App:   appConfig,
 		Db:    dbConfig,
 		Redis: redisConfig,
 		Jwt:   jwtConfig,
+		Oauth: oauthConfig,
 	}, nil
 }
 
