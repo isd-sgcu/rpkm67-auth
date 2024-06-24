@@ -2,13 +2,17 @@ package auth
 
 import (
 	"context"
+	"net/url"
+	"strings"
 
 	"github.com/isd-sgcu/rpkm67-auth/constant"
+	"github.com/isd-sgcu/rpkm67-auth/internal/oauth"
 	"github.com/isd-sgcu/rpkm67-auth/internal/token"
 	"github.com/isd-sgcu/rpkm67-auth/internal/user"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/auth/v1"
 	userProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"go.uber.org/zap"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -19,20 +23,22 @@ type Service interface {
 
 type serviceImpl struct {
 	proto.UnimplementedAuthServiceServer
-	userSvc  user.Service
-	tokenSvc token.Service
-	utils    AuthUtils
-	bcrypt   BcryptUtils
-	log      *zap.Logger
+	oauthConfig *oauth2.Config
+	oauthClient oauth.GoogleOauthClient
+	userSvc     user.Service
+	tokenSvc    token.Service
+	utils       AuthUtils
+	log         *zap.Logger
 }
 
-func NewService(userSvc user.Service, tokenSvc token.Service, utils AuthUtils, bcrypt BcryptUtils, log *zap.Logger) Service {
+func NewService(oauthConfig *oauth2.Config, oauthClient oauth.GoogleOauthClient, userSvc user.Service, tokenSvc token.Service, utils AuthUtils, log *zap.Logger) Service {
 	return &serviceImpl{
-		userSvc:  userSvc,
-		tokenSvc: tokenSvc,
-		utils:    utils,
-		bcrypt:   bcrypt,
-		log:      log,
+		oauthConfig: oauthConfig,
+		oauthClient: oauthClient,
+		userSvc:     userSvc,
+		tokenSvc:    tokenSvc,
+		utils:       utils,
+		log:         log,
 	}
 }
 
@@ -44,76 +50,90 @@ func (s *serviceImpl) RefreshToken(_ context.Context, in *proto.RefreshTokenRequ
 	return nil, nil
 }
 
-func (s *serviceImpl) SignUp(_ context.Context, in *proto.SignUpRequest) (res *proto.SignUpResponse, err error) {
-	role := "user"
-	if s.utils.IsStudentIdInMap(in.Email) {
-		role = "staff"
-	}
-
-	hashedPassword, err := s.bcrypt.GenerateHashedPassword(in.Password)
+func (s *serviceImpl) GetGoogleLoginUrl(_ context.Context, in *proto.GetGoogleLoginUrlRequest) (res *proto.GetGoogleLoginUrlResponse, err error) {
+	URL, err := url.Parse(s.oauthConfig.Endpoint.AuthURL)
 	if err != nil {
-		s.log.Named("SignUp").Error("GenerateHashedPassword: ", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		s.log.Named("GetGoogleLoginUrl").Error("Parse: ", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Internal server error")
 	}
+	parameters := url.Values{}
+	parameters.Add("client_id", s.oauthConfig.ClientID)
+	parameters.Add("scope", strings.Join(s.oauthConfig.Scopes, " "))
+	parameters.Add("redirect_uri", s.oauthConfig.RedirectURL)
+	parameters.Add("response_type", "code")
+	URL.RawQuery = parameters.Encode()
+	url := URL.String()
 
-	createUser := &userProto.CreateUserRequest{
-		Email:     in.Email,
-		Password:  hashedPassword,
-		Firstname: in.Firstname,
-		Lastname:  in.Lastname,
-		Role:      role,
-	}
-
-	userRes, err := s.userSvc.Create(context.Background(), createUser)
-	if err != nil {
-		s.log.Named("SignUp").Error("Create: ", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &proto.SignUpResponse{
-		Id:        userRes.User.Id,
-		Email:     userRes.User.Email,
-		Firstname: userRes.User.Firstname,
-		Lastname:  userRes.User.Lastname,
+	return &proto.GetGoogleLoginUrlResponse{
+		Url: url,
 	}, nil
 }
 
-func (s *serviceImpl) SignIn(_ context.Context, in *proto.SignInRequest) (res *proto.SignInResponse, err error) {
-	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{Email: in.Email})
-	if err != nil {
-		s.log.Named("SignIn").Error("FindByEmail: ", zap.Error(err))
-		return nil, status.Error(codes.Unauthenticated, err.Error())
+func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogleLoginRequest) (res *proto.VerifyGoogleLoginResponse, err error) {
+	code := in.Code
+	if code == "" {
+		return nil, status.Error(codes.InvalidArgument, "No code is provided")
 	}
 
-	err = s.bcrypt.CompareHashedPassword(user.User.Password, in.Password)
+	email, err := s.oauthClient.GetUserEmail(code)
 	if err != nil {
-		s.log.Named("SignIn").Error("CompareHashedPassword: ", zap.Error(err))
-		return nil, status.Error(codes.Unauthenticated, err.Error())
+		s.log.Named("VerifyGoogleLogin").Error("GetUserEmail: ", zap.Error(err))
+		switch err.Error() {
+		case "Invalid code":
+			return nil, status.Error(codes.InvalidArgument, "Invalid code")
+		default:
+			return nil, status.Error(codes.Internal, "Internal server error")
+		}
 	}
 
-	credentials, err := s.tokenSvc.GetCredentials(user.User.Id, constant.Role(user.User.Role))
+	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{Email: email})
+	userId := user.User.Id
+	role := user.User.Role
 	if err != nil {
-		s.log.Named("SignIn").Error("GetCredentials: ", zap.Error(err))
+		st, ok := status.FromError(err)
+		if !ok {
+			s.log.Named("VerifyGoogleLogin").Error("FindByEmail: ", zap.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		switch st.Code() {
+		case codes.NotFound:
+			role := "user"
+			if s.utils.IsStudentIdInMap(email) {
+				role = "staff"
+			}
+
+			createUser := &userProto.CreateUserRequest{
+				Email: email,
+				Role:  role,
+			}
+
+			createdUser, err := s.userSvc.Create(context.Background(), createUser)
+			if err != nil {
+				s.log.Named("VerifyGoogleLogin").Error("Create: ", zap.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			userId = createdUser.User.Id
+			role = createdUser.User.Role
+
+		default:
+			s.log.Named("VerifyGoogleLogin").Error("FindByEmail: ", zap.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+
+	credentials, err := s.tokenSvc.GetCredentials(userId, constant.Role(role))
+	if err != nil {
+		s.log.Named("VerifyGoogleLogin").Error("GetCredentials: ", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &proto.SignInResponse{
+	return &proto.VerifyGoogleLoginResponse{
 		Credential: &proto.Credential{
 			AccessToken:  credentials.AccessToken,
 			RefreshToken: credentials.RefreshToken,
-			ExpiresIn:    int32(s.tokenSvc.GetConfig().AccessTTL),
+			// ExpiresIn:    credentials.ExpiresIn,
 		},
 	}, nil
-}
 
-func (s *serviceImpl) SignOut(_ context.Context, in *proto.SignOutRequest) (res *proto.SignOutResponse, err error) {
-	return nil, nil
-}
-
-func (s *serviceImpl) ForgotPassword(_ context.Context, in *proto.ForgotPasswordRequest) (res *proto.ForgotPasswordResponse, err error) {
-	return nil, nil
-}
-
-func (s *serviceImpl) ResetPassword(_ context.Context, in *proto.ResetPasswordRequest) (res *proto.ResetPasswordResponse, err error) {
-	return nil, nil
 }

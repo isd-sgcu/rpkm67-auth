@@ -15,6 +15,7 @@ import (
 	"github.com/isd-sgcu/rpkm67-auth/internal/auth"
 	"github.com/isd-sgcu/rpkm67-auth/internal/cache"
 	"github.com/isd-sgcu/rpkm67-auth/internal/jwt"
+	"github.com/isd-sgcu/rpkm67-auth/internal/oauth"
 	"github.com/isd-sgcu/rpkm67-auth/internal/token"
 	"github.com/isd-sgcu/rpkm67-auth/internal/user"
 	"github.com/isd-sgcu/rpkm67-auth/logger"
@@ -52,7 +53,9 @@ func main() {
 
 	jwtSvc := jwt.NewService(conf.Jwt, jwt.NewJwtStrategy(conf.Jwt.Secret), jwt.NewJwtUtils(), logger.Named("jwtSvc"))
 	tokenSvc := token.NewService(jwtSvc, cacheRepo, token.NewTokenUtils(), logger.Named("tokenSvc"))
-	authSvc := auth.NewService(userSvc, tokenSvc, auth.NewAuthUtils(), auth.NewBcryptUtils(), logger.Named("authSvc"))
+	oauthConfig := config.LoadOauthConfig(conf.Oauth)
+	oauthClient := oauth.NewGoogleOauthClient(oauthConfig, logger.Named("oauthClient"))
+	authSvc := auth.NewService(oauthConfig, oauthClient, userSvc, tokenSvc, auth.NewAuthUtils(), logger.Named("authSvc"))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", conf.App.Port))
 	if err != nil {

@@ -10,7 +10,6 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	v1 "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/auth/v1"
-	grpc "google.golang.org/grpc"
 )
 
 // MockService is a mock of Service interface.
@@ -36,142 +35,74 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
-// ForgotPassword mocks base method.
-func (m *MockService) ForgotPassword(ctx context.Context, in *v1.ForgotPasswordRequest, opts ...grpc.CallOption) (*v1.ForgotPasswordResponse, error) {
+// GetGoogleLoginUrl mocks base method.
+func (m *MockService) GetGoogleLoginUrl(arg0 context.Context, arg1 *v1.GetGoogleLoginUrlRequest) (*v1.GetGoogleLoginUrlResponse, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ForgotPassword", varargs...)
-	ret0, _ := ret[0].(*v1.ForgotPasswordResponse)
+	ret := m.ctrl.Call(m, "GetGoogleLoginUrl", arg0, arg1)
+	ret0, _ := ret[0].(*v1.GetGoogleLoginUrlResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ForgotPassword indicates an expected call of ForgotPassword.
-func (mr *MockServiceMockRecorder) ForgotPassword(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// GetGoogleLoginUrl indicates an expected call of GetGoogleLoginUrl.
+func (mr *MockServiceMockRecorder) GetGoogleLoginUrl(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ForgotPassword", reflect.TypeOf((*MockService)(nil).ForgotPassword), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGoogleLoginUrl", reflect.TypeOf((*MockService)(nil).GetGoogleLoginUrl), arg0, arg1)
 }
 
 // RefreshToken mocks base method.
-func (m *MockService) RefreshToken(ctx context.Context, in *v1.RefreshTokenRequest, opts ...grpc.CallOption) (*v1.RefreshTokenResponse, error) {
+func (m *MockService) RefreshToken(arg0 context.Context, arg1 *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "RefreshToken", varargs...)
+	ret := m.ctrl.Call(m, "RefreshToken", arg0, arg1)
 	ret0, _ := ret[0].(*v1.RefreshTokenResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RefreshToken indicates an expected call of RefreshToken.
-func (mr *MockServiceMockRecorder) RefreshToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) RefreshToken(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockService)(nil).RefreshToken), varargs...)
-}
-
-// ResetPassword mocks base method.
-func (m *MockService) ResetPassword(ctx context.Context, in *v1.ResetPasswordRequest, opts ...grpc.CallOption) (*v1.ResetPasswordResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ResetPassword", varargs...)
-	ret0, _ := ret[0].(*v1.ResetPasswordResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ResetPassword indicates an expected call of ResetPassword.
-func (mr *MockServiceMockRecorder) ResetPassword(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPassword", reflect.TypeOf((*MockService)(nil).ResetPassword), varargs...)
-}
-
-// SignIn mocks base method.
-func (m *MockService) SignIn(ctx context.Context, in *v1.SignInRequest, opts ...grpc.CallOption) (*v1.SignInResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "SignIn", varargs...)
-	ret0, _ := ret[0].(*v1.SignInResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SignIn indicates an expected call of SignIn.
-func (mr *MockServiceMockRecorder) SignIn(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignIn", reflect.TypeOf((*MockService)(nil).SignIn), varargs...)
-}
-
-// SignOut mocks base method.
-func (m *MockService) SignOut(ctx context.Context, in *v1.SignOutRequest, opts ...grpc.CallOption) (*v1.SignOutResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "SignOut", varargs...)
-	ret0, _ := ret[0].(*v1.SignOutResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SignOut indicates an expected call of SignOut.
-func (mr *MockServiceMockRecorder) SignOut(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignOut", reflect.TypeOf((*MockService)(nil).SignOut), varargs...)
-}
-
-// SignUp mocks base method.
-func (m *MockService) SignUp(ctx context.Context, in *v1.SignUpRequest, opts ...grpc.CallOption) (*v1.SignUpResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "SignUp", varargs...)
-	ret0, _ := ret[0].(*v1.SignUpResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SignUp indicates an expected call of SignUp.
-func (mr *MockServiceMockRecorder) SignUp(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignUp", reflect.TypeOf((*MockService)(nil).SignUp), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockService)(nil).RefreshToken), arg0, arg1)
 }
 
 // Validate mocks base method.
-func (m *MockService) Validate(ctx context.Context, in *v1.ValidateRequest, opts ...grpc.CallOption) (*v1.ValidateResponse, error) {
+func (m *MockService) Validate(arg0 context.Context, arg1 *v1.ValidateRequest) (*v1.ValidateResponse, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Validate", varargs...)
+	ret := m.ctrl.Call(m, "Validate", arg0, arg1)
 	ret0, _ := ret[0].(*v1.ValidateResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Validate indicates an expected call of Validate.
-func (mr *MockServiceMockRecorder) Validate(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Validate(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockService)(nil).Validate), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockService)(nil).Validate), arg0, arg1)
+}
+
+// VerifyGoogleLogin mocks base method.
+func (m *MockService) VerifyGoogleLogin(arg0 context.Context, arg1 *v1.VerifyGoogleLoginRequest) (*v1.VerifyGoogleLoginResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyGoogleLogin", arg0, arg1)
+	ret0, _ := ret[0].(*v1.VerifyGoogleLoginResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// VerifyGoogleLogin indicates an expected call of VerifyGoogleLogin.
+func (mr *MockServiceMockRecorder) VerifyGoogleLogin(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyGoogleLogin", reflect.TypeOf((*MockService)(nil).VerifyGoogleLogin), arg0, arg1)
+}
+
+// mustEmbedUnimplementedAuthServiceServer mocks base method.
+func (m *MockService) mustEmbedUnimplementedAuthServiceServer() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "mustEmbedUnimplementedAuthServiceServer")
+}
+
+// mustEmbedUnimplementedAuthServiceServer indicates an expected call of mustEmbedUnimplementedAuthServiceServer.
+func (mr *MockServiceMockRecorder) mustEmbedUnimplementedAuthServiceServer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedAuthServiceServer", reflect.TypeOf((*MockService)(nil).mustEmbedUnimplementedAuthServiceServer))
 }

@@ -32,11 +32,8 @@ func NewService(repo Repository, log *zap.Logger) proto.UserServiceServer {
 
 func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (res *proto.CreateUserResponse, err error) {
 	createUser := &model.User{
-		Email:     req.Email,
-		Password:  req.Password, // already hashed in auth service
-		Firstname: req.Firstname,
-		Lastname:  req.Lastname,
-		Role:      constant.Role(req.Role),
+		Email: req.Email,
+		Role:  constant.Role(req.Role),
 	}
 
 	err = s.repo.Create(createUser)
@@ -91,7 +88,6 @@ func ModelToProto(in *model.User) *proto.User {
 	return &proto.User{
 		Id:        in.ID.String(),
 		Email:     in.Email,
-		Password:  in.Password,
 		Firstname: in.Firstname,
 		Lastname:  in.Lastname,
 		Role:      in.Role.String(),

@@ -8,7 +8,6 @@ watch:
 	air
 
 mock-gen:
-	mockgen -source ./internal/auth/auth.repository.go -destination ./mocks/auth/auth.repository.go
 	mockgen -source ./internal/auth/auth.service.go -destination ./mocks/auth/auth.service.go
 	mockgen -source ./internal/user/user.service.go -destination ./mocks/user/user.service.go
 

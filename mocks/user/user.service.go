@@ -50,6 +50,21 @@ func (mr *MockServiceMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockService)(nil).Create), arg0, arg1)
 }
 
+// FindByEmail mocks base method.
+func (m *MockService) FindByEmail(arg0 context.Context, arg1 *v1.FindByEmailRequest) (*v1.FindByEmailResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByEmail", arg0, arg1)
+	ret0, _ := ret[0].(*v1.FindByEmailResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByEmail indicates an expected call of FindByEmail.
+func (mr *MockServiceMockRecorder) FindByEmail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByEmail", reflect.TypeOf((*MockService)(nil).FindByEmail), arg0, arg1)
+}
+
 // FindOne mocks base method.
 func (m *MockService) FindOne(arg0 context.Context, arg1 *v1.FindOneUserRequest) (*v1.FindOneUserResponse, error) {
 	m.ctrl.T.Helper()
@@ -63,6 +78,21 @@ func (m *MockService) FindOne(arg0 context.Context, arg1 *v1.FindOneUserRequest)
 func (mr *MockServiceMockRecorder) FindOne(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockService)(nil).FindOne), arg0, arg1)
+}
+
+// Update mocks base method.
+func (m *MockService) Update(arg0 context.Context, arg1 *v1.UpdateUserRequest) (*v1.UpdateUserResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", arg0, arg1)
+	ret0, _ := ret[0].(*v1.UpdateUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockServiceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockService)(nil).Update), arg0, arg1)
 }
 
 // mustEmbedUnimplementedUserServiceServer mocks base method.

@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 type AppConfig struct {
@@ -110,4 +112,14 @@ func LoadConfig() (*Config, error) {
 
 func (ac *AppConfig) IsDevelopment() bool {
 	return ac.Env == "development"
+}
+
+func LoadOauthConfig(oauth OauthConfig) *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     oauth.ClientId,
+		ClientSecret: oauth.ClientSecret,
+		RedirectURL:  oauth.RedirectUri,
+		Endpoint:     google.Endpoint,
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+	}
 }
