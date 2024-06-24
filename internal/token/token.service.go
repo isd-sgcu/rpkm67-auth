@@ -64,6 +64,7 @@ func (s *serviceImpl) GetCredentials(userId string, role constant.Role) (*dto.Cr
 		newCredentials := &dto.Credentials{
 			AccessToken:  accessToken,
 			RefreshToken: credentials.RefreshToken,
+			ExpiresIn:    s.jwtService.GetConfig().AccessTTL,
 		}
 
 		err = s.cache.SetValue(sessionKey(userId), newCredentials, s.jwtService.GetConfig().AccessTTL)

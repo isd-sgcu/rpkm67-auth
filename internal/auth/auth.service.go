@@ -132,7 +132,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		Credential: &proto.Credential{
 			AccessToken:  credentials.AccessToken,
 			RefreshToken: credentials.RefreshToken,
-			// ExpiresIn:    credentials.ExpiresIn,
+			ExpiresIn:    int32(credentials.ExpiresIn),
 		},
 	}, nil
 
