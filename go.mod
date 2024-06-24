@@ -6,13 +6,14 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
-	github.com/isd-sgcu/rpkm67-go-proto v0.0.5
+	github.com/isd-sgcu/rpkm67-go-proto v0.1.1
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.5.3
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.24.0
+	golang.org/x/oauth2 v0.21.0
 	google.golang.org/grpc v1.64.0
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.10
