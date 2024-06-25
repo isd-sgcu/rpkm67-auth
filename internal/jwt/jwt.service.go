@@ -6,8 +6,8 @@ import (
 
 	_jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/isd-sgcu/rpkm67-auth/config"
-	"github.com/isd-sgcu/rpkm67-auth/constant"
 	"github.com/isd-sgcu/rpkm67-auth/internal/dto"
+	"github.com/isd-sgcu/rpkm67-model/constant"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

@@ -2,7 +2,7 @@ package dto
 
 import (
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/isd-sgcu/rpkm67-auth/constant"
+	"github.com/isd-sgcu/rpkm67-model/constant"
 )
 
 type Credentials struct {

@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/isd-sgcu/rpkm67-auth/config"
-	"github.com/isd-sgcu/rpkm67-auth/constant"
 	"github.com/isd-sgcu/rpkm67-auth/internal/cache"
 	"github.com/isd-sgcu/rpkm67-auth/internal/dto"
 	"github.com/isd-sgcu/rpkm67-auth/internal/jwt"
+	"github.com/isd-sgcu/rpkm67-model/constant"
 	"go.uber.org/zap"
 )
 

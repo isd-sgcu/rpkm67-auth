@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/isd-sgcu/rpkm67-auth/config"
-	"github.com/isd-sgcu/rpkm67-auth/internal/model"
+	"github.com/isd-sgcu/rpkm67-model/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
@@ -20,7 +20,7 @@ func InitDatabase(conf *config.DbConfig, isDebug bool) (db *gorm.DB, err error) 
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&model.User{})
+	err = db.AutoMigrate(&model.Group{}, &model.User{}, &model.Selection{}, &model.Stamp{}, &model.CheckIn{})
 	if err != nil {
 		return nil, err
 	}

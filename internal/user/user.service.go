@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/isd-sgcu/rpkm67-auth/constant"
-	"github.com/isd-sgcu/rpkm67-auth/internal/model"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
+	"github.com/isd-sgcu/rpkm67-model/constant"
+	"github.com/isd-sgcu/rpkm67-model/model"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,7 +40,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 	if err != nil {
 		s.log.Named("Create").Error("Create: ", zap.Error(err))
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return nil, status.Error(codes.AlreadyExists, constant.DuplicateEmailErrorMessage)
+			return nil, status.Error(codes.AlreadyExists, "duplicate email")
 		}
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest) 
 	if err != nil {
 		s.log.Named("FindOne").Error("FindOne: ", zap.Error(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
+			return nil, status.Error(codes.NotFound, "user not found")
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -74,7 +74,7 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailReque
 	if err != nil {
 		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Error(codes.NotFound, constant.UserNotFoundErrorMessage)
+			return nil, status.Error(codes.NotFound, "user not found")
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}

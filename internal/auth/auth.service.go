@@ -5,12 +5,12 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/isd-sgcu/rpkm67-auth/constant"
 	"github.com/isd-sgcu/rpkm67-auth/internal/oauth"
 	"github.com/isd-sgcu/rpkm67-auth/internal/token"
 	"github.com/isd-sgcu/rpkm67-auth/internal/user"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/auth/v1"
 	userProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
+	"github.com/isd-sgcu/rpkm67-model/constant"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc/codes"

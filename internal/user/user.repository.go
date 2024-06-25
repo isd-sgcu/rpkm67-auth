@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/isd-sgcu/rpkm67-auth/internal/model"
+	"github.com/isd-sgcu/rpkm67-model/model"
 	"gorm.io/gorm"
 )
 
