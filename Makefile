@@ -10,6 +10,7 @@ watch:
 mock-gen:
 	mockgen -source ./internal/auth/auth.service.go -destination ./mocks/auth/auth.service.go
 	mockgen -source ./internal/user/user.service.go -destination ./mocks/user/user.service.go
+	mockgen -source ./internal/user/user.repository.go -destination ./mocks/user/user.repository.go
 
 test:
 	go vet ./...
