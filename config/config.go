@@ -33,9 +33,9 @@ type JwtConfig struct {
 }
 
 type OauthConfig struct {
-	ClientId     string `mapstructure:"client_id"`
-	ClientSecret string `mapstructure:"client_secret"`
-	RedirectUri  string `mapstructure:"redirect_uri"`
+	ClientId     string
+	ClientSecret string
+	RedirectUri  string
 }
 
 type Config struct {
