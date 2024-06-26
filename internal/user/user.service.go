@@ -84,6 +84,11 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailReque
 	}, nil
 }
 
+func (s *serviceImpl) Update(_ context.Context, req *proto.UpdateUserRequest) (res *proto.UpdateUserResponse, err error) {
+	// pun devops
+	return nil, nil
+}
+
 func ModelToProto(in *model.User) *proto.User {
 	return &proto.User{
 		Id:        in.ID.String(),
