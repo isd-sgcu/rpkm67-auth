@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/isd-sgcu/rpkm67-auth/internal/dto"
 	"github.com/isd-sgcu/rpkm67-auth/internal/oauth"
 	"github.com/isd-sgcu/rpkm67-auth/internal/token"
 	"github.com/isd-sgcu/rpkm67-auth/internal/user"
@@ -86,9 +87,9 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		}
 	}
 
+	credentials := &dto.Credentials{}
+
 	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{Email: email})
-	userId := user.User.Id
-	role := user.User.Role
 	if err != nil {
 		st, ok := status.FromError(err)
 		if !ok {
@@ -97,6 +98,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		}
 		switch st.Code() {
 		case codes.NotFound:
+			s.log.Named("VerifyGoogleLogin").Info("User not found, creating new user")
 			role := "user"
 			if s.utils.IsStudentIdInMap(email) {
 				role = "staff"
@@ -113,8 +115,11 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
-			userId = createdUser.User.Id
-			role = createdUser.User.Role
+			credentials, err = s.tokenSvc.GetCredentials(createdUser.User.Id, constant.Role(createdUser.User.Role))
+			if err != nil {
+				s.log.Named("VerifyGoogleLogin").Error("GetCredentials: ", zap.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 
 		default:
 			s.log.Named("VerifyGoogleLogin").Error("FindByEmail: ", zap.Error(err))
@@ -122,7 +127,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		}
 	}
 
-	credentials, err := s.tokenSvc.GetCredentials(userId, constant.Role(role))
+	credentials, err = s.tokenSvc.GetCredentials(user.User.Id, constant.Role(user.User.Role))
 	if err != nil {
 		s.log.Named("VerifyGoogleLogin").Error("GetCredentials: ", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())

@@ -120,6 +120,6 @@ func LoadOauthConfig(oauth OauthConfig) *oauth2.Config {
 		ClientSecret: oauth.ClientSecret,
 		RedirectURL:  oauth.RedirectUri,
 		Endpoint:     google.Endpoint,
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 	}
 }
