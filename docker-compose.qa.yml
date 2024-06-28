@@ -8,6 +8,7 @@ services:
     environment:
       APP_PORT: 3001
       APP_ENV: development
+      APP_MAX_FILE_SIZE_MB: 10
       CORS_ORIGINS: http://localhost:3000
       SERVICE_AUTH: http://localhost:3002
       SERVICE_BACKEND: backend:3003
