@@ -98,3 +98,12 @@ func ModelToProto(in *model.User) *proto.User {
 		Role:      in.Role.String(),
 	}
 }
+
+func ProtoToModel(in *proto.User) *model.User {
+	return &model.User{
+		Email:     in.Email,
+		Firstname: in.Firstname,
+		Lastname:  in.Lastname,
+		Role:      constant.Role(in.Role),
+	}
+}
