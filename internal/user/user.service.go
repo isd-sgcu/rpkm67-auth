@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"github.com/isd-sgcu/rpkm67-model/constant"
 	"github.com/isd-sgcu/rpkm67-model/model"
@@ -85,25 +86,76 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailReque
 }
 
 func (s *serviceImpl) Update(_ context.Context, req *proto.UpdateUserRequest) (res *proto.UpdateUserResponse, err error) {
-	// pun devops
-	return nil, nil
+	updateUser, err := UpdateRequestToModel(req)
+	if err != nil {
+		s.log.Named("Update").Error("UpdateRequestToModel: ", zap.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	err = s.repo.Update(req.Id, updateUser)
+	if err != nil {
+		s.log.Named("Update").Error("Update: ", zap.Error(err))
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		return nil, err
+	}
+
+	return &proto.UpdateUserResponse{
+		User: ModelToProto(updateUser),
+	}, nil
 }
 
 func ModelToProto(in *model.User) *proto.User {
 	return &proto.User{
-		Id:        in.ID.String(),
-		Email:     in.Email,
-		Firstname: in.Firstname,
-		Lastname:  in.Lastname,
-		Role:      in.Role.String(),
+		Id:          in.ID.String(),
+		Email:       in.Email,
+		Nickname:    in.Nickname,
+		Title:       in.Title,
+		Firstname:   in.Firstname,
+		Lastname:    in.Lastname,
+		Year:        int32(in.Year),
+		Faculty:     in.Faculty,
+		Tel:         in.Tel,
+		ParentTel:   in.ParentTel,
+		Parent:      in.Parent,
+		FoodAllergy: in.FoodAllergy,
+		DrugAllergy: in.DrugAllergy,
+		Illness:     in.Illness,
+		Role:        in.Role.String(),
+		PhotoKey:    in.PhotoKey,
+		PhotoUrl:    in.PhotoUrl,
+		Baan:        in.Baan,
+		GroupId:     in.GroupID.String(),
+		ReceiveGift: int32(in.ReceiveGift),
 	}
 }
 
-func ProtoToModel(in *proto.User) *model.User {
-	return &model.User{
-		Email:     in.Email,
-		Firstname: in.Firstname,
-		Lastname:  in.Lastname,
-		Role:      constant.Role(in.Role),
+func UpdateRequestToModel(in *proto.UpdateUserRequest) (*model.User, error) {
+	groupId, err := uuid.Parse(in.GroupId)
+	if err != nil {
+		return nil, err
 	}
+
+	return &model.User{
+		Email:       in.Email,
+		Nickname:    in.Nickname,
+		Title:       in.Title,
+		Firstname:   in.Firstname,
+		Lastname:    in.Lastname,
+		Year:        int(in.Year),
+		Faculty:     in.Faculty,
+		Tel:         in.Tel,
+		ParentTel:   in.ParentTel,
+		Parent:      in.Parent,
+		FoodAllergy: in.FoodAllergy,
+		DrugAllergy: in.DrugAllergy,
+		Illness:     in.Illness,
+		Role:        constant.Role(in.Role),
+		PhotoKey:    in.PhotoKey,
+		PhotoUrl:    in.PhotoUrl,
+		Baan:        in.Baan,
+		GroupID:     &groupId,
+		ReceiveGift: int(in.ReceiveGift),
+	}, nil
 }
