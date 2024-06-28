@@ -121,6 +121,10 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
+			return &proto.VerifyGoogleLoginResponse{
+				Credential: s.dtoToProtoCredential(credentials),
+			}, nil
+
 		default:
 			s.log.Named("VerifyGoogleLogin").Error("FindByEmail: ", zap.Error(err))
 			return nil, status.Error(codes.Internal, err.Error())
@@ -134,11 +138,15 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 	}
 
 	return &proto.VerifyGoogleLoginResponse{
-		Credential: &proto.Credential{
-			AccessToken:  credentials.AccessToken,
-			RefreshToken: credentials.RefreshToken,
-			ExpiresIn:    int32(credentials.ExpiresIn),
-		},
+		Credential: s.dtoToProtoCredential(credentials),
 	}, nil
 
+}
+
+func (s *serviceImpl) dtoToProtoCredential(dto *dto.Credentials) *proto.Credential {
+	return &proto.Credential{
+		AccessToken:  dto.AccessToken,
+		RefreshToken: dto.RefreshToken,
+		ExpiresIn:    int32(dto.ExpiresIn),
+	}
 }
