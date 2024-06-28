@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
 	"github.com/isd-sgcu/rpkm67-model/constant"
 	"github.com/isd-sgcu/rpkm67-model/model"
@@ -85,12 +86,11 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailReque
 }
 
 func (s *serviceImpl) Update(_ context.Context, req *proto.UpdateUserRequest) (res *proto.UpdateUserResponse, err error) {
-
-	rawUpdateUser := proto.User(*req)
-	modUpdateUser := ProtoToModel(&rawUpdateUser)
-
-	// Map the fields before parsing to repo.Update first
-	updateUser := modUpdateUser
+	updateUser, err := UpdateRequestToModel(req)
+	if err != nil {
+		s.log.Named("Update").Error("UpdateRequestToModel: ", zap.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
 	err = s.repo.Update(req.Id, updateUser)
 	if err != nil {
@@ -100,6 +100,7 @@ func (s *serviceImpl) Update(_ context.Context, req *proto.UpdateUserRequest) (r
 		}
 		return nil, err
 	}
+
 	return &proto.UpdateUserResponse{
 		User: ModelToProto(updateUser),
 	}, nil
@@ -107,10 +108,10 @@ func (s *serviceImpl) Update(_ context.Context, req *proto.UpdateUserRequest) (r
 
 func ModelToProto(in *model.User) *proto.User {
 	return &proto.User{
-		Id:        in.ID.String(),
+		Id:          in.ID.String(),
 		Email:       in.Email,
 		Nickname:    in.Nickname,
-		// Title:       in.Title,
+		Title:       in.Title,
 		Firstname:   in.Firstname,
 		Lastname:    in.Lastname,
 		Year:        int32(in.Year),
@@ -125,16 +126,21 @@ func ModelToProto(in *model.User) *proto.User {
 		PhotoKey:    in.PhotoKey,
 		PhotoUrl:    in.PhotoUrl,
 		Baan:        in.Baan,
-		GroupId:      in.GroupID.String(),
+		GroupId:     in.GroupID.String(),
 		ReceiveGift: int32(in.ReceiveGift),
 	}
 }
 
-func ProtoToModel(in *proto.User) *model.User {
+func UpdateRequestToModel(in *proto.UpdateUserRequest) (*model.User, error) {
+	groupId, err := uuid.Parse(in.GroupId)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.User{
 		Email:       in.Email,
 		Nickname:    in.Nickname,
-		// Title:       in.Title,
+		Title:       in.Title,
 		Firstname:   in.Firstname,
 		Lastname:    in.Lastname,
 		Year:        int(in.Year),
@@ -149,7 +155,7 @@ func ProtoToModel(in *proto.User) *model.User {
 		PhotoKey:    in.PhotoKey,
 		PhotoUrl:    in.PhotoUrl,
 		Baan:        in.Baan,
-		// GroupID:     in.GroupId
+		GroupID:     &groupId,
 		ReceiveGift: int(in.ReceiveGift),
-	}
+	}, nil
 }
