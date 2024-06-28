@@ -1,6 +1,9 @@
 docker:
 	docker-compose up
 
+docker-qa:
+	docker-compose -f docker-compose.qa.yml up
+
 server:
 	go run cmd/main.go
 
