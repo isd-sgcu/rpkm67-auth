@@ -158,6 +158,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 
 	return &proto.VerifyGoogleLoginResponse{
 		Credential: s.dtoToProtoCredential(credentials),
+		UserId:     user.User.Id,
 	}, nil
 
 }
