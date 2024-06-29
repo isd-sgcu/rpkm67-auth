@@ -72,7 +72,7 @@ func (s *serviceImpl) GetGoogleLoginUrl(_ context.Context, in *proto.GetGoogleLo
 	URL, err := url.Parse(s.oauthConfig.Endpoint.AuthURL)
 	if err != nil {
 		s.log.Named("GetGoogleLoginUrl").Error("Parse: ", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Internal server error")
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	parameters := url.Values{}
 	parameters.Add("client_id", s.oauthConfig.ClientID)
