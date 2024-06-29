@@ -1,8 +1,11 @@
 package token
 
 import (
+	"errors"
 	"fmt"
+	"time"
 
+	_jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/isd-sgcu/rpkm67-auth/config"
 	"github.com/isd-sgcu/rpkm67-auth/internal/cache"
@@ -16,6 +19,7 @@ type Service interface {
 	GetCredentials(userId string, role constant.Role) (*dto.Credentials, error)
 	CreateCredentials(userId string, role constant.Role) (*dto.Credentials, error)
 	RefreshToken(refreshToken string) (*dto.Credentials, error)
+	ValidateToken(token string) (*dto.UserCredentials, error)
 	GetConfig() *config.JwtConfig
 }
 
@@ -141,6 +145,53 @@ func (s *serviceImpl) RefreshToken(refreshToken string) (*dto.Credentials, error
 	}
 
 	return credentials, nil
+}
+
+func (s *serviceImpl) ValidateToken(token string) (*dto.UserCredentials, error) {
+	jwtToken, err := s.jwtService.ValidateToken(token)
+	if err != nil {
+		s.log.Named("ValidateToken").Error("ValidateToken: ", zap.Error(err))
+		return nil, err
+	}
+
+	payloads := jwtToken.Claims.(_jwt.MapClaims)
+	if payloads["iss"] != s.jwtService.GetConfig().Issuer {
+		return nil, errors.New("invalid token")
+	}
+
+	if time.Unix(int64(payloads["exp"].(float64)), 0).Before(time.Now()) {
+		return nil, errors.New("expired token")
+	}
+
+	credentials := &dto.Credentials{}
+
+	err = s.cache.GetValue(sessionKey(payloads["user_id"].(string)), credentials)
+	if err != nil {
+		s.log.Named("ValidateToken").Error("GetValue: ", zap.Error(err))
+		return nil, err
+	}
+
+	if token != credentials.AccessToken {
+		return nil, errors.New("invalid token")
+	}
+
+	userId, ok := payloads["user_id"].(string)
+	if !ok {
+		s.log.Named("ValidateToken").Error("user_id not found in payloads")
+		return nil, fmt.Errorf("user_id not found in payloads")
+	}
+
+	role, ok := payloads["role"].(constant.Role)
+	if !ok {
+		s.log.Named("ValidateToken").Error("role not found in payloads")
+		return nil, fmt.Errorf("role not found in payloads")
+	}
+
+	return &dto.UserCredentials{
+		UserID: userId,
+		Role:   role,
+	}, nil
+
 }
 
 func (s *serviceImpl) GetConfig() *config.JwtConfig {

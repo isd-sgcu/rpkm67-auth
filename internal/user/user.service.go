@@ -33,8 +33,9 @@ func NewService(repo Repository, log *zap.Logger) proto.UserServiceServer {
 
 func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (res *proto.CreateUserResponse, err error) {
 	createUser := &model.User{
-		Email: req.Email,
-		Role:  constant.Role(req.Role),
+		Email:   req.Email,
+		Role:    constant.Role(req.Role),
+		GroupID: nil,
 	}
 
 	err = s.repo.Create(createUser)
@@ -107,7 +108,7 @@ func (s *serviceImpl) Update(_ context.Context, req *proto.UpdateUserRequest) (r
 }
 
 func ModelToProto(in *model.User) *proto.User {
-	return &proto.User{
+	protoUser := &proto.User{
 		Id:          in.ID.String(),
 		Email:       in.Email,
 		Nickname:    in.Nickname,
@@ -126,9 +127,14 @@ func ModelToProto(in *model.User) *proto.User {
 		PhotoKey:    in.PhotoKey,
 		PhotoUrl:    in.PhotoUrl,
 		Baan:        in.Baan,
-		GroupId:     in.GroupID.String(),
 		ReceiveGift: int32(in.ReceiveGift),
 	}
+
+	if in.GroupID != nil {
+		protoUser.GroupId = in.GroupID.String()
+	}
+
+	return protoUser
 }
 
 func UpdateRequestToModel(in *proto.UpdateUserRequest) (*model.User, error) {

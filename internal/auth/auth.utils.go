@@ -3,6 +3,8 @@ package auth
 import (
 	"encoding/json"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type AuthUtils interface {
@@ -22,6 +24,20 @@ func NewAuthUtils() AuthUtils {
 	return &authUtilsImpl{
 		staffStudentIdMap: staffStudentIdMap,
 	}
+}
+
+func IsEmailChulaStudent(email string) bool {
+	studentId := extractStudentIdFromEmail(email)
+	if len(studentId) != 10 {
+		return false
+	}
+
+	year, err := strconv.ParseInt(studentId[:2], 10, 64)
+	if err != nil {
+		return false
+	}
+
+	return year <= 67 && strings.HasSuffix(email, "@student.chula.ac.th")
 }
 
 func (u *authUtilsImpl) IsStudentIdInMap(email string) bool {
