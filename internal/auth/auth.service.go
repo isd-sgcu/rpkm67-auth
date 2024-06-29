@@ -72,7 +72,7 @@ func (s *serviceImpl) GetGoogleLoginUrl(_ context.Context, in *proto.GetGoogleLo
 	URL, err := url.Parse(s.oauthConfig.Endpoint.AuthURL)
 	if err != nil {
 		s.log.Named("GetGoogleLoginUrl").Error("Parse: ", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, status.Error(codes.Internal, "Cannot parse Google OAuth URL")
 	}
 	parameters := url.Values{}
 	parameters.Add("client_id", s.oauthConfig.ClientID)
@@ -100,7 +100,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		case "Invalid code":
 			return nil, status.Error(codes.InvalidArgument, "Invalid code")
 		default:
-			return nil, status.Error(codes.Internal, "Internal server error")
+			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
 
@@ -131,7 +131,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 			createdUser, err := s.userSvc.Create(context.Background(), createUser)
 			if err != nil {
 				s.log.Named("VerifyGoogleLogin").Error("Create: ", zap.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
+				return nil, err
 			}
 
 			credentials, err := s.tokenSvc.GetCredentials(createdUser.User.Id, constant.Role(createdUser.User.Role))
@@ -146,7 +146,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 
 		default:
 			s.log.Named("VerifyGoogleLogin").Error("FindByEmail: ", zap.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, err
 		}
 	}
 
