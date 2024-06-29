@@ -87,8 +87,6 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		}
 	}
 
-	credentials := &dto.Credentials{}
-
 	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{Email: email})
 	if err != nil {
 		st, ok := status.FromError(err)
@@ -115,7 +113,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
-			credentials, err = s.tokenSvc.GetCredentials(createdUser.User.Id, constant.Role(createdUser.User.Role))
+			credentials, err := s.tokenSvc.GetCredentials(createdUser.User.Id, constant.Role(createdUser.User.Role))
 			if err != nil {
 				s.log.Named("VerifyGoogleLogin").Error("GetCredentials: ", zap.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
@@ -131,7 +129,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		}
 	}
 
-	credentials, err = s.tokenSvc.GetCredentials(user.User.Id, constant.Role(user.User.Role))
+	credentials, err := s.tokenSvc.GetCredentials(user.User.Id, constant.Role(user.User.Role))
 	if err != nil {
 		s.log.Named("VerifyGoogleLogin").Error("GetCredentials: ", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
