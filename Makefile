@@ -1,3 +1,17 @@
+pull-latest-mac:
+	docker pull --platform linux/x86_64 ghcr.io/isd-sgcu/rpkm67-gateway:latest
+	docker pull --platform linux/x86_64 ghcr.io/isd-sgcu/rpkm67-auth:latest
+	docker pull --platform linux/x86_64 ghcr.io/isd-sgcu/rpkm67-backend:latest
+	docker pull --platform linux/x86_64 ghcr.io/isd-sgcu/rpkm67-checkin:latest
+	docker pull --platform linux/x86_64 ghcr.io/isd-sgcu/rpkm67-store:latest
+
+pull-latest-windows:
+	docker pull ghcr.io/isd-sgcu/rpkm67-gateway:latest
+	docker pull ghcr.io/isd-sgcu/rpkm67-auth:latest
+	docker pull ghcr.io/isd-sgcu/rpkm67-backend:latest
+	docker pull ghcr.io/isd-sgcu/rpkm67-checkin:latest
+	docker pull ghcr.io/isd-sgcu/rpkm67-store:latest
+
 docker:
 	docker-compose up
 

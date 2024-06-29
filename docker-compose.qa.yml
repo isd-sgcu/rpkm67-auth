@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   gateway:
-    image: ghcr.io/isd-sgcu/rpkm67-gateway:914e1c9a6b3a8d2ac1b0a9ff4173076fc36d1df3
+    image: ghcr.io/isd-sgcu/rpkm67-gateway:latest
     container_name: gateway
     restart: unless-stopped
     environment:
@@ -20,7 +20,7 @@ services:
       - "3001:3001"
   
   backend:
-    image: ghcr.io/isd-sgcu/rpkm67-backend:40ca3d5cda65663fcc8c32ede5170a2dc456d7b9
+    image: ghcr.io/isd-sgcu/rpkm67-backend:latest
     container_name: backend
     restart: unless-stopped
     environment:
@@ -40,7 +40,7 @@ services:
       - "3003:3003"
 
   checkin:
-    image: ghcr.io/isd-sgcu/rpkm67-checkin:718156635121b4d560c5d4d4f75fd9abdf3103cb
+    image: ghcr.io/isd-sgcu/rpkm67-checkin:latest
     container_name: checkin
     restart: unless-stopped
     environment:
@@ -53,7 +53,7 @@ services:
       - "3004:3004"
 
   store:
-    image: ghcr.io/isd-sgcu/rpkm67-store:a6f718f5556abfb44b10b178fba0db9f9dc717a1
+    image: ghcr.io/isd-sgcu/rpkm67-store:latest
     container_name: store
     restart: unless-stopped
     environment:
