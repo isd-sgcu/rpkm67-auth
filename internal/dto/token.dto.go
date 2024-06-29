@@ -11,6 +11,11 @@ type Credentials struct {
 	ExpiresIn    int    `json:"expires_in"`
 }
 
+type UserCredentials struct {
+	UserID string        `json:"user_id"`
+	Role   constant.Role `json:"role"`
+}
+
 type AuthPayload struct {
 	jwt.RegisteredClaims
 	UserId string        `json:"user_id"`

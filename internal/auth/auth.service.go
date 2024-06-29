@@ -44,11 +44,28 @@ func NewService(oauthConfig *oauth2.Config, oauthClient oauth.GoogleOauthClient,
 }
 
 func (s *serviceImpl) Validate(_ context.Context, in *proto.ValidateRequest) (res *proto.ValidateResponse, err error) {
-	return nil, nil
+	userCredentials, err := s.tokenSvc.ValidateToken(in.AccessToken)
+	if err != nil {
+		s.log.Named("Validate").Error("ValidateToken: ", zap.Error(err))
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	return &proto.ValidateResponse{
+		UserId: userCredentials.UserID,
+		Role:   string(userCredentials.Role),
+	}, nil
 }
 
 func (s *serviceImpl) RefreshToken(_ context.Context, in *proto.RefreshTokenRequest) (res *proto.RefreshTokenResponse, err error) {
-	return nil, nil
+	credentials, err := s.tokenSvc.RefreshToken(in.RefreshToken)
+	if err != nil {
+		s.log.Named("RefreshToken").Error("RefreshToken: ", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &proto.RefreshTokenResponse{
+		Credential: s.dtoToProtoCredential(credentials),
+	}, nil
 }
 
 func (s *serviceImpl) GetGoogleLoginUrl(_ context.Context, in *proto.GetGoogleLoginUrlRequest) (res *proto.GetGoogleLoginUrlResponse, err error) {
