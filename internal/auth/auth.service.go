@@ -104,6 +104,10 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		}
 	}
 
+	if !IsEmailChulaStudent(email) {
+		return nil, status.Error(codes.PermissionDenied, "Email is not a Chula student")
+	}
+
 	user, err := s.userSvc.FindByEmail(context.Background(), &userProto.FindByEmailRequest{Email: email})
 	if err != nil {
 		st, ok := status.FromError(err)
