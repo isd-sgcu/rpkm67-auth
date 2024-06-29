@@ -18,6 +18,27 @@ services:
       - rpkm67
     ports:
       - "3001:3001"
+
+  # auth:
+  #   image: ghcr.io/isd-sgcu/rpkm67-auth:latest
+  #   container_name: auth
+  #   restart: unless-stopped
+  #   environment:
+  #     APP_PORT: 3002
+  #     APP_ENV: development
+  #     DB_URL: postgres://root:1234@db:5432/rpkm67_db
+  #     REDIS_HOST: localhost
+  #     REDIS_PORT: 6379
+  #     REDIS_PASSWORD: 5678
+  #     JWT_SECRET: secret
+  #     JWT_ACCESS_TTL: 3600
+  #     JWT_REFRESH_TTL: 259200
+  #     JWT_ISSUER: rpkm67.sgcu.in.th
+  #     JWT_RESET_TOKEN_TTL: 900
+  #   networks:
+  #     - rpkm67
+  #   ports:
+  #     - "3002:3002"
   
   backend:
     image: ghcr.io/isd-sgcu/rpkm67-backend:latest
