@@ -25,11 +25,10 @@ type RedisConfig struct {
 }
 
 type JwtConfig struct {
-	Secret        string
-	AccessTTL     int
-	RefreshTTL    int
-	Issuer        string
-	ResetTokenTTL int
+	Secret     string
+	AccessTTL  int
+	RefreshTTL int
+	Issuer     string
 }
 
 type OauthConfig struct {
@@ -82,17 +81,12 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	resetTokenTTL, err := strconv.ParseInt(os.Getenv("JWT_RESET_TOKEN_TTL"), 10, 64)
-	if err != nil {
-		return nil, err
-	}
 
 	jwtConfig := JwtConfig{
-		Secret:        os.Getenv("JWT_SECRET"),
-		AccessTTL:     int(accessTTL),
-		RefreshTTL:    int(refreshTTL),
-		Issuer:        os.Getenv("JWT_ISSUER"),
-		ResetTokenTTL: int(resetTokenTTL),
+		Secret:     os.Getenv("JWT_SECRET"),
+		AccessTTL:  int(accessTTL),
+		RefreshTTL: int(refreshTTL),
+		Issuer:     os.Getenv("JWT_ISSUER"),
 	}
 
 	oauthConfig := OauthConfig{
