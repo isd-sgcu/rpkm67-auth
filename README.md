@@ -1,4 +1,4 @@
-# rpkm67-gateway
+# rpkm67-auth
 
 ## Stack
 
