@@ -182,7 +182,7 @@ func (s *serviceImpl) ValidateToken(token string) (*dto.UserCredentials, error) 
 		return nil, fmt.Errorf("user_id not found in payloads")
 	}
 
-	role, ok := payloads["role"].(constant.Role)
+	role, ok := payloads["role"]
 	if !ok {
 		s.log.Named("ValidateToken").Error("role not found in payloads")
 		return nil, fmt.Errorf("role not found in payloads")
@@ -190,7 +190,7 @@ func (s *serviceImpl) ValidateToken(token string) (*dto.UserCredentials, error) 
 
 	return &dto.UserCredentials{
 		UserID: userId,
-		Role:   role,
+		Role:   constant.Role(role.(string)),
 	}, nil
 
 }
