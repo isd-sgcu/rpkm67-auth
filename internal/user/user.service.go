@@ -63,6 +63,7 @@ func (s *serviceImpl) FindOne(_ context.Context, req *proto.FindOneUserRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	s.log.Named("FindOne").Info("FindOne: ", zap.Any("user", ModelToProto(user)))
 	return &proto.FindOneUserResponse{
 		User: ModelToProto(user),
 	}, nil
