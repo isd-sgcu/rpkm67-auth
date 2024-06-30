@@ -38,13 +38,7 @@ func ModelToProto(in *model.User) *proto.User {
 }
 
 func UpdateRequestToModel(in *proto.UpdateUserRequest) (*model.User, error) {
-	groupId, err := uuid.Parse(in.GroupId)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.User{
-		Email:       in.Email,
+	user := &model.User{
 		Nickname:    in.Nickname,
 		Title:       in.Title,
 		Firstname:   in.Firstname,
@@ -61,7 +55,16 @@ func UpdateRequestToModel(in *proto.UpdateUserRequest) (*model.User, error) {
 		PhotoKey:    in.PhotoKey,
 		PhotoUrl:    in.PhotoUrl,
 		Baan:        in.Baan,
-		GroupID:     &groupId,
 		ReceiveGift: int(in.ReceiveGift),
-	}, nil
+	}
+
+	if in.GroupId != "" {
+		groupId, err := uuid.Parse(in.GroupId)
+		if err != nil {
+			return nil, err
+		}
+		user.GroupID = &groupId
+	}
+
+	return user, nil
 }

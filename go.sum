@@ -27,6 +27,8 @@ github.com/isd-sgcu/rpkm67-go-proto v0.1.8 h1:ng1FzEeJIOrMHNg1FrSnbdquwYRlfOW/az
 github.com/isd-sgcu/rpkm67-go-proto v0.1.8/go.mod h1:Z5SYz5kEe4W+MdqPouF0zEOiaqvg+s9I1S5d0q6e+Jw=
 github.com/isd-sgcu/rpkm67-go-proto v0.2.0 h1:tPfNgCuqS4g0f+2hzcpY+8hYXSa7DZDPvRejRzOk2cI=
 github.com/isd-sgcu/rpkm67-go-proto v0.2.0/go.mod h1:Z5SYz5kEe4W+MdqPouF0zEOiaqvg+s9I1S5d0q6e+Jw=
+github.com/isd-sgcu/rpkm67-go-proto v0.2.2 h1:FP2EBqRp+/z2DUSXygOC7SgmS1T3ZRlm4gqRhpU7qbw=
+github.com/isd-sgcu/rpkm67-go-proto v0.2.2/go.mod h1:Z5SYz5kEe4W+MdqPouF0zEOiaqvg+s9I1S5d0q6e+Jw=
 github.com/isd-sgcu/rpkm67-model v0.0.3 h1:xvUNozwDIc0e5a68NQPzViH5ICID+5n/0wlMJLXp5Gw=
 github.com/isd-sgcu/rpkm67-model v0.0.3/go.mod h1:dxgLSkrFpbQOXsrzqgepZoEOyZUIG2LBGtm5gsuBbVc=
 github.com/isd-sgcu/rpkm67-model v0.0.4 h1:tk6z6pXnhWBoG2SaSIoyLxNnwRaXwdbSIEEa/cSi8EY=
