@@ -46,6 +46,12 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 		return nil, err
 	}
 
+	err = s.repo.CreateUserStamp(CreateEmptyStamp(&createUser.ID))
+	if err != nil {
+		s.log.Named("Create").Error("CreateUserStamp: ", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &proto.CreateUserResponse{
 		User: ModelToProto(createUser),
 	}, nil
