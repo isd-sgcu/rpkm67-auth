@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/google/uuid"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/auth/user/v1"
+	stampProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/backend/stamp/v1"
 	"github.com/isd-sgcu/rpkm67-model/constant"
 	"github.com/isd-sgcu/rpkm67-model/model"
 )
@@ -28,6 +29,13 @@ func ModelToProto(in *model.User) *proto.User {
 		PhotoUrl:    in.PhotoUrl,
 		Baan:        in.Baan,
 		ReceiveGift: int32(in.ReceiveGift),
+		Stamp: &stampProto.Stamp{
+			PointA: int32(in.Stamp.PointA),
+			PointB: int32(in.Stamp.PointB),
+			PointC: int32(in.Stamp.PointC),
+			PointD: int32(in.Stamp.PointD),
+			Stamp:  in.Stamp.Stamp,
+		},
 	}
 
 	if in.GroupID != nil {
@@ -67,4 +75,15 @@ func UpdateRequestToModel(in *proto.UpdateUserRequest) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func CreateEmptyStamp(userId *uuid.UUID) *model.Stamp {
+	return &model.Stamp{
+		UserID: userId,
+		PointA: 0,
+		PointB: 0,
+		PointC: 0,
+		PointD: 0,
+		Stamp:  "00000000000",
+	}
 }
