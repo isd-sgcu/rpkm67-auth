@@ -36,8 +36,10 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 		Role:    constant.Role(req.Role),
 		GroupID: nil,
 	}
+	newStamp := NewStampModel(&createUser.ID)
+	newGroup := NewGroupModel(&createUser.ID)
 
-	err = s.repo.Create(createUser)
+	err = s.repo.Create(createUser, newStamp, newGroup)
 	if err != nil {
 		s.log.Named("Create").Error("Create: ", zap.Error(err))
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
@@ -46,14 +48,12 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateUserRequest) (r
 		return nil, err
 	}
 
-	emptyStamp := CreateEmptyStamp(&createUser.ID)
-	createUser.Stamp = emptyStamp
-
-	err = s.repo.CreateUserStamp(emptyStamp)
+	err = s.repo.AssignGroup(createUser.ID.String(), &newGroup.ID)
 	if err != nil {
-		s.log.Named("Create").Error("CreateUserStamp: ", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		s.log.Named("Create").Error("AssignGroup: ", zap.Error(err))
+		return nil, err
 	}
+	createUser.GroupID = &newGroup.ID
 
 	return &proto.CreateUserResponse{
 		User: ModelToProto(createUser),

@@ -28,18 +28,16 @@ func ModelToProto(in *model.User) *proto.User {
 		PhotoKey:    in.PhotoKey,
 		PhotoUrl:    in.PhotoUrl,
 		Baan:        in.Baan,
+		GroupId:     in.GroupID.String(),
 		ReceiveGift: int32(in.ReceiveGift),
 		Stamp: &stampProto.Stamp{
+			Id:     in.Stamp.ID.String(),
 			PointA: int32(in.Stamp.PointA),
 			PointB: int32(in.Stamp.PointB),
 			PointC: int32(in.Stamp.PointC),
 			PointD: int32(in.Stamp.PointD),
 			Stamp:  in.Stamp.Stamp,
 		},
-	}
-
-	if in.GroupID != nil {
-		protoUser.GroupId = in.GroupID.String()
 	}
 
 	return protoUser
@@ -77,7 +75,7 @@ func UpdateRequestToModel(in *proto.UpdateUserRequest) (*model.User, error) {
 	return user, nil
 }
 
-func CreateEmptyStamp(userId *uuid.UUID) *model.Stamp {
+func NewStampModel(userId *uuid.UUID) *model.Stamp {
 	return &model.Stamp{
 		UserID: userId,
 		PointA: 0,
@@ -85,5 +83,12 @@ func CreateEmptyStamp(userId *uuid.UUID) *model.Stamp {
 		PointC: 0,
 		PointD: 0,
 		Stamp:  "00000000000",
+	}
+}
+
+func NewGroupModel(userId *uuid.UUID) *model.Group {
+	return &model.Group{
+		LeaderID:    userId,
+		IsConfirmed: false,
 	}
 }
