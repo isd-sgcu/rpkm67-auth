@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/isd-sgcu/rpkm67-auth/config"
 	"github.com/isd-sgcu/rpkm67-auth/internal/dto"
 	"github.com/isd-sgcu/rpkm67-auth/internal/oauth"
 	"github.com/isd-sgcu/rpkm67-auth/internal/token"
@@ -24,6 +25,7 @@ type Service interface {
 
 type serviceImpl struct {
 	proto.UnimplementedAuthServiceServer
+	conf        *config.AuthConfig
 	oauthConfig *oauth2.Config
 	oauthClient oauth.GoogleOauthClient
 	userSvc     user.Service
@@ -32,8 +34,9 @@ type serviceImpl struct {
 	log         *zap.Logger
 }
 
-func NewService(oauthConfig *oauth2.Config, oauthClient oauth.GoogleOauthClient, userSvc user.Service, tokenSvc token.Service, utils AuthUtils, log *zap.Logger) Service {
+func NewService(conf *config.AuthConfig, oauthConfig *oauth2.Config, oauthClient oauth.GoogleOauthClient, userSvc user.Service, tokenSvc token.Service, utils AuthUtils, log *zap.Logger) Service {
 	return &serviceImpl{
+		conf:        conf,
 		oauthConfig: oauthConfig,
 		oauthClient: oauthClient,
 		userSvc:     userSvc,
@@ -104,7 +107,7 @@ func (s *serviceImpl) VerifyGoogleLogin(_ context.Context, in *proto.VerifyGoogl
 		}
 	}
 
-	if !IsEmailChulaStudent(email) {
+	if s.conf.CheckChulaEmail && !IsEmailChulaStudent(email) {
 		return nil, status.Error(codes.Unauthenticated, "Email is not a Chula student")
 	}
 

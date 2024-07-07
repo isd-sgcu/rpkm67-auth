@@ -55,7 +55,7 @@ func main() {
 	tokenSvc := token.NewService(jwtSvc, cacheRepo, token.NewTokenUtils(), logger.Named("tokenSvc"))
 	oauthConfig := config.LoadOauthConfig(conf.Oauth)
 	oauthClient := oauth.NewGoogleOauthClient(oauthConfig, logger.Named("oauthClient"))
-	authSvc := auth.NewService(oauthConfig, oauthClient, userSvc, tokenSvc, auth.NewAuthUtils(), logger.Named("authSvc"))
+	authSvc := auth.NewService(&conf.Auth, oauthConfig, oauthClient, userSvc, tokenSvc, auth.NewAuthUtils(), logger.Named("authSvc"))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", conf.App.Port))
 	if err != nil {

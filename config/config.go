@@ -31,6 +31,10 @@ type JwtConfig struct {
 	Issuer     string
 }
 
+type AuthConfig struct {
+	CheckChulaEmail bool
+}
+
 type OauthConfig struct {
 	ClientId     string
 	ClientSecret string
@@ -42,6 +46,7 @@ type Config struct {
 	Db    DbConfig
 	Redis RedisConfig
 	Jwt   JwtConfig
+	Auth  AuthConfig
 	Oauth OauthConfig
 }
 
@@ -89,6 +94,10 @@ func LoadConfig() (*Config, error) {
 		Issuer:     os.Getenv("JWT_ISSUER"),
 	}
 
+	authConfig := AuthConfig{
+		CheckChulaEmail: os.Getenv("AUTH_CHECK_CHULA_EMAIL") == "true",
+	}
+
 	oauthConfig := OauthConfig{
 		ClientId:     os.Getenv("OAUTH_CLIENT_ID"),
 		ClientSecret: os.Getenv("OAUTH_CLIENT_SECRET"),
@@ -100,6 +109,7 @@ func LoadConfig() (*Config, error) {
 		Db:    dbConfig,
 		Redis: redisConfig,
 		Jwt:   jwtConfig,
+		Auth:  authConfig,
 		Oauth: oauthConfig,
 	}, nil
 }
