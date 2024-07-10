@@ -53,7 +53,7 @@ type Config struct {
 func LoadConfig() (*Config, error) {
 	if os.Getenv("APP_ENV") == "" {
 		err := godotenv.Load(".env")
-		if err != nil {
+		if err != nil && !os.IsNotExist(err) {
 			return nil, err
 		}
 	}

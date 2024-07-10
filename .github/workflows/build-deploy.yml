@@ -1,13 +1,13 @@
 name: Build
 
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: [Bump version]
+    types:
+      - completed
   push:
-    branches:
-      - main
-      - dev
     tags:
-      - v*
+      - 'v*'
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
@@ -40,5 +40,4 @@ jobs:
           tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }},${{ env.IMAGE_NAME }}:latest
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
-
 # docker pull --platform linux/x86_64

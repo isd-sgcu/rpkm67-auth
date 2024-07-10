@@ -1,4 +1,4 @@
-FROM golang:1.22.4-alpine3.20 as builder
+FROM golang:1.22.4 AS builder
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -7,15 +7,15 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o server ./cmd/main.go
+RUN go build -ldflags "-s -w" -o server ./cmd/main.go
 
 
-FROM alpine AS runner
+FROM gcr.io/distroless/base-debian12 AS runner
 WORKDIR /app
 
 COPY --from=builder /app/server ./
 
-ENV GO_ENV production
+ENV GO_ENV=production
 
 EXPOSE 3000
 
