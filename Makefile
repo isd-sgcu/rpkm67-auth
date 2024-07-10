@@ -1,3 +1,12 @@
+.PHONY: setup pull-latest-mac pull-latest-windows docker docker-qa server watch mock-gen test proto model
+
+setup:
+	go mod download
+	go install github.com/air-verse/air
+	go install github.com/golang/mock/mockgen@v1.6.0
+	go get github.com/isd-sgcu/rpkm67-go-proto@latest
+	go get github.com/isd-sgcu/rpkm67-model@latest
+
 pull-latest-mac:
 	docker pull --platform linux/x86_64 ghcr.io/isd-sgcu/rpkm67-gateway:latest
 	docker pull --platform linux/x86_64 ghcr.io/isd-sgcu/rpkm67-auth:latest
